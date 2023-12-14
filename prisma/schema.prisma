@@ -11,12 +11,14 @@ datasource db {
 }
 
 model Transaction {
-  id                  Int      @id @default(autoincrement())
-  uuid                String   @default(uuid()) @db.Uuid
-  price               Float
-  created_at          DateTime
-  insert_coin_full_at DateTime
-  is_complete         Boolean
+  id                          Int                    @id @default(autoincrement())
+  uuid                        String                 @default(uuid()) @db.Uuid
+  price                       Float
+  created_at                  DateTime               @default(now())
+  insert_coin_full_at         DateTime?
+  is_complete                 Boolean                @default(false)
+  washing_machine_location_id Int
+  WashingMachineLocation      WashingMachineLocation @relation(fields: [washing_machine_location_id], references: [id])
 }
 
 model WashingMachine {
@@ -35,6 +37,7 @@ model WashingMachineLocation {
   Branch             Branch         @relation(fields: [branch_id], references: [id])
   washing_machine_id Int
   branch_id          Int
+  Transaction        Transaction[]
 }
 
 model Branch {
@@ -44,3 +47,10 @@ model Branch {
   branch_address         String
   WashingMachineLocation WashingMachineLocation[]
 }
+
+// model WashingPriceRate {
+//   id                Int    @id @default(autoincrement())
+//   uuid              String
+//   price             Float
+//   price_description String
+// }

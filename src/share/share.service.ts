@@ -17,4 +17,12 @@ export class ShareService {
 
     return resp;
   }
+
+  validateCoin(coin: number): boolean {
+    console.log(coin);
+    if (coin === 10) {
+      return true;
+    }
+    return false;
+  }
 }

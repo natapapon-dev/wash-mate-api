@@ -3,7 +3,7 @@ import { ShareService } from './share.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Module({
-  providers: [ShareService],
+  providers: [ShareService, PrismaService],
   exports: [ShareService, PrismaService],
 })
 export class ShareModule {}
