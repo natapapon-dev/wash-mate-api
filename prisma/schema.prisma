@@ -23,13 +23,14 @@ model WashingMachine {
   id                     Int                      @id @default(autoincrement())
   uuid                   String                   @default(uuid()) @db.Uuid
   number                 String
+  status                 Int // 0 = normal, 1 = broken
   WashingMachineLocation WashingMachineLocation[]
 }
 
 model WashingMachineLocation {
   id                 Int            @id @default(autoincrement())
   uuid               String         @default(uuid()) @db.Uuid
-  status             Int // 0 = available, 1 = in_used, 2 = broken, 3 = re_location
+  status             Int // 0 = available, 1 = broken, 2 = in_used, 3 = re_location
   WashingMachine     WashingMachine @relation(fields: [washing_machine_id], references: [id])
   Branch             Branch         @relation(fields: [branch_id], references: [id])
   washing_machine_id Int
