@@ -93,13 +93,4 @@ export class WashingMachineTodoService {
     });
     return result;
   }
-
-  async toGetAvailableMachineByBranch(branch_id: number): Promise<any> {
-    const result = await this.prisma.washingMachine.findMany({
-      where: {
-        WashingMachineLocation: { some: { branch_id: branch_id, status: 0 } },
-      },
-    });
-    return result;
-  }
 }
