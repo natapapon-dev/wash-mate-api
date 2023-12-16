@@ -3,16 +3,19 @@ import { WashingMachineTodoService } from './washing_machine.todo.service';
 import { ShareService } from 'src/share/share.service';
 import { ResponseAPI } from 'src/share/share.dto';
 import { TransactionPayload } from '../washing_machine.dto';
+import { WashingMachineLocationTodoService } from 'src/washing_machine_location/services/washing_machine_location.todo.service';
 
 @Injectable()
 export class WashingMachineService {
   constructor(
     private washingMachineTodo: WashingMachineTodoService,
+    private washingMachineLocationTodo: WashingMachineLocationTodoService,
     private shared: ShareService,
   ) {}
 
   async onInsertCoin(machine_id: string, coin: number): Promise<ResponseAPI> {
     let result: any;
+
     if (!this.shared.validateCoin(coin)) {
       result = this.shared.buildResponseAPI(null, 'invalid coin', false, 403);
 
@@ -50,6 +53,25 @@ export class WashingMachineService {
         is_complete,
         insert_coin_full_at,
       );
+
+      if (result.is_complete) {
+        const update_wm_status =
+          this.washingMachineLocationTodo.toUpdateMachineLocationStatus(
+            2,
+            result.washing_machine_location_id,
+          );
+
+        if (!update_wm_status) {
+          result = this.shared.buildResponseAPI(
+            null,
+            'update washing machine status failed',
+            false,
+            400,
+          );
+
+          return result;
+        }
+      }
     } else {
       let transaction: TransactionPayload = new TransactionPayload();
       transaction.is_complete = false;
