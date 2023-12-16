@@ -6,7 +6,6 @@ import { TransactionPayload } from '../washing_machine.dto';
 @Injectable()
 export class WashingMachineTodoService {
   constructor(private prisma: PrismaService) {}
-  // constructor(private prisma: PrismaService) {}
 
   async toGetWashingMachineByUUID(uuid: string): Promise<WashingMachine> {
     const result = await this.prisma.washingMachine.findFirst({
@@ -84,12 +83,16 @@ export class WashingMachineTodoService {
   }
 
   async toGetLastestTransaction(machine_id: number): Promise<any> {
-    const fiveMinute = new Date(new Date().getTime() + 5 * 60000);
     const result = await this.prisma.transaction.findFirst({
       where: {
         washing_machine_location_id: machine_id,
-        created_at: { lte: fiveMinute },
+        is_complete: false,
+        expired_at: { gt: new Date() },
       },
+      orderBy: {
+        created_at: 'desc',
+      },
+      take: 1,
     });
     return result;
   }

@@ -6,8 +6,6 @@ import { TransactionPayload } from '../washing_machine.dto';
 
 @Injectable()
 export class WashingMachineService {
-  response = new ResponseAPI();
-
   constructor(
     private washingMachineTodo: WashingMachineTodoService,
     private shared: ShareService,
@@ -16,11 +14,7 @@ export class WashingMachineService {
   async onInsertCoin(machine_id: string, coin: number): Promise<ResponseAPI> {
     let result: any;
     if (!this.shared.validateCoin(coin)) {
-      this.response.data = null;
-      this.response.message = 'invalid coin';
-      this.response.status = false;
-      this.response.http_code = 403;
-      result = this.response;
+      result = this.shared.buildResponseAPI(null, 'invalid coin', false, 403);
 
       return result;
     }
@@ -32,12 +26,12 @@ export class WashingMachineService {
         washingMachine.id,
       );
     } else {
-      this.response.data = null;
-      this.response.message = `couldn't find washing machine UUID ${machine_id}`;
-      this.response.status = false;
-      this.response.http_code = 404;
-
-      result = this.response;
+      result = this.shared.buildResponseAPI(
+        null,
+        `couldn't find washing machine UUID ${machine_id}`,
+        false,
+        404,
+      );
 
       return result;
     }
@@ -46,8 +40,10 @@ export class WashingMachineService {
       let insert_coin_full_at = null;
       let is_complete = false;
       if (coin + result.price === 60) {
-        (is_complete = true), (insert_coin_full_at = new Date());
+        is_complete = true;
+        insert_coin_full_at = new Date();
       }
+
       result = await this.washingMachineTodo.toUpdateCurrentTransaction(
         result.id,
         coin + result.price,
@@ -64,32 +60,28 @@ export class WashingMachineService {
       try {
         result = await this.washingMachineTodo.toCreateTransaction(transaction);
       } catch (e) {
-        this.response.status = false;
-        this.response.message = e.message;
-        this.response.http_code = 500;
-        result = this.response;
+        result = this.shared.buildResponseAPI(null, e.message, false, 500);
 
         return result;
       }
     }
 
     if (result) {
-      this.response.data = result;
-      this.response.message = 'successfully insert coin';
+      let message: string;
+      message = 'successfully insert coin';
 
       if (result.is_complete) {
-        this.response.message = 'complete insert coin';
+        message = 'complete insert coin';
       }
 
-      this.response.status = true;
-      this.response.http_code = 200;
-      result = this.response;
+      result = this.shared.buildResponseAPI(result, message, true, 200);
     } else {
-      this.response.data = result;
-      this.response.message = 'failed to create transaction';
-      this.response.status = false;
-      this.response.http_code = 400;
-      result = this.response;
+      result = this.shared.buildResponseAPI(
+        result,
+        'failed to create transaction',
+        false,
+        400,
+      );
     }
 
     return result;

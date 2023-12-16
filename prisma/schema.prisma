@@ -15,6 +15,7 @@ model Transaction {
   uuid                        String                 @default(uuid()) @db.Uuid
   price                       Float
   created_at                  DateTime               @default(now())
+  expired_at                  DateTime               @default(dbgenerated("NOW() + interval '5 minutes'"))
   insert_coin_full_at         DateTime?
   is_complete                 Boolean                @default(false)
   washing_machine_location_id Int
