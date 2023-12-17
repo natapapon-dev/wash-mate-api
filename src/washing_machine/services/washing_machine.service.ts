@@ -4,9 +4,10 @@ import { WashingMachineTodoService } from './washing_machine.todo.service';
 import { ShareService } from 'src/share/share.service';
 import { ResponseAPI } from 'src/share/share.dto';
 import { TransactionPayload } from '../washing_machine.dto';
-import { InjectQueue } from '@nestjs/bull';
+import { BranchTodoService } from 'src/branch/services/branch.todo.service';
 import { NotifyService } from 'src/notify/service/notify.service';
 import { WashingMachineLocationTodoService } from 'src/washing_machine_location/services/washing_machine_location.todo.service';
+import { WashingMachine } from '@prisma/client';
 
 @Injectable()
 export class WashingMachineService {
@@ -16,6 +17,7 @@ export class WashingMachineService {
     private shared: ShareService,
     private schdule: SchedulerRegistry,
     private notify: NotifyService,
+    private branchTodo: BranchTodoService,
   ) {}
 
   async onInsertCoin(machine_id: string, coin: number): Promise<ResponseAPI> {
@@ -92,12 +94,11 @@ export class WashingMachineService {
             washingMachine.id,
             2,
           );
-          this.delayedExecution(
-            2 * 60 * 1000,
-            result.washing_machine_location_id,
-          );
 
-          // this.setNotiLineCountDown(result.washing_machine_location_id);
+          this.setNotiLineCountDown(
+            result.washing_machine_location_id,
+            result.branch_id,
+          );
         }
       }
     } else {
@@ -109,6 +110,11 @@ export class WashingMachineService {
 
       try {
         result = await this.washingMachineTodo.toCreateTransaction(transaction);
+
+        this.sendMachineStartNoti(
+          washingMachine,
+          washingMachine['WashingMachineLocation'][0].branch_id,
+        );
       } catch (e) {
         result = this.shared.buildResponseAPI(null, e.message, false, 500);
 
@@ -137,17 +143,18 @@ export class WashingMachineService {
     return result;
   }
 
-  delayedExecution(delay: number, machineLocationId: number): Promise<void> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        this.setNotiLineCountDown(machineLocationId);
-        resolve();
-      }, delay);
-    });
+  private async sendMachineStartNoti(wm: WashingMachine, brancId: number) {
+    const branchToken = await this.branchTodo.toGetBranchLineToken(brancId);
+    const message = `เครื่องหมายเลข ${wm.number} เริ่มใช้งาน`;
+    this.notify.notifyJob(branchToken, message);
   }
 
-  // @Cron('50 * * * * *')
-  async setNotiLineCountDown(machineLocationId: number) {
+  private async setNotiLineCountDown(
+    machineLocationId: number,
+    branchId: number,
+  ) {
+    const branchToken = await this.branchTodo.toGetBranchLineToken(branchId);
+
     const result =
       await this.washingMachineLocationTodo.toUpdateMachineLocationStatus(
         0,
@@ -159,8 +166,11 @@ export class WashingMachineService {
       0,
     );
 
-    console.log('Called when is 1 minute');
-    console.debug(result);
-    console.debug(result_w);
+    const message = `เครื่องหมายเลข ${result_w.number} เหลือเวลา 1 นาที`;
+
+    console.debug('save result of update washing machine status :: ', result);
+    console.debug('save result of washingmachine status :: ', result_w);
+
+    await this.notify.notifyJob(branchToken, message);
   }
 }

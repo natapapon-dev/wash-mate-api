@@ -23,4 +23,15 @@ export class BranchTodoService {
 
     return result;
   }
+
+  async toGetBranchLineToken(id: number): Promise<string> {
+    const result = await this.prisma.branch.findFirst({
+      where: { id: id },
+      select: {
+        branch_line_group_token: true,
+      },
+    });
+
+    return result.branch_line_group_token;
+  }
 }

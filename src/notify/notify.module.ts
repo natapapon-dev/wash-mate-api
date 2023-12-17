@@ -12,10 +12,12 @@ import * as https from 'https';
         baseURL: process.env.LINE_API_URL,
         headers: {
           common: {
-            Authorization: `Bearer ${process.env.LINE_TOKEN}`,
             'Content-Type': 'application/x-www-form-urlencoded',
           },
         } as any,
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: false,
+        }),
       }),
     }),
   ],

@@ -8,15 +8,19 @@ export class NotifyService {
 
   async notifyJob(branchToken: string, message: string): Promise<any> {
     branchToken = 'Fd4cZR76hLZF61zvAdhB754UpoL9E5h2EiJyA2IN2ht';
+
     try {
-      const configBranchToken = {
-        headers: {
-          Authorization: `Bearer ${branchToken}`,
-        },
+      const headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `Bearer ${branchToken}`,
+      };
+
+      const payload = {
+        message: message,
       };
 
       const response = await this.httpService
-        .post('/api/notify', `message=${message}`, configBranchToken)
+        .post('/api/notify', `message=${message}`, { headers })
         .toPromise();
 
       console.debug('LINE Notify response status:', response.status);
@@ -24,6 +28,7 @@ export class NotifyService {
 
       return response.data;
     } catch (error) {
+      console.log(error);
       throw error;
     }
   }

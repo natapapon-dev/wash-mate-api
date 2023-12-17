@@ -1,4 +1,4 @@
-import { Controller, Post, Param, Query, Body } from '@nestjs/common';
+import { Controller, Post, Param, Body } from '@nestjs/common';
 import { WashingMachineService } from '../services/washing_machine.service';
 import { ShareService } from 'src/share/share.service';
 import { ResponseAPI } from 'src/share/share.dto';
@@ -24,14 +24,13 @@ export class WashingMachineController {
 
   @Post(':machine_id/insert-coin')
   async insertCoin(
-    @Query('machine_id') machine_id: string,
+    @Param('machine_id') machine_id: string,
     @Body() req: TransactionReq,
   ): Promise<ResponseAPI> {
     let result: any;
 
     try {
-      // result = this.washingMachine.onInsertCoin(machine_id, req.coin);
-      result = this.washingMachine.onTest();
+      result = this.washingMachine.onInsertCoin(machine_id, req.coin);
     } catch (e) {
       result = this.shared.buildResponseAPI(null, e, false, 500);
     }
