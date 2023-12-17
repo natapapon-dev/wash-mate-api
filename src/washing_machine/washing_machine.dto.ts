@@ -1,4 +1,7 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 export class TransactionReq {
+  @ApiProperty({ type: Number, required: true, name: 'coin' })
   coin: number;
 }
 

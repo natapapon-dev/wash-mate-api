@@ -3,24 +3,15 @@ import { WashingMachineService } from '../services/washing_machine.service';
 import { ShareService } from 'src/share/share.service';
 import { ResponseAPI } from 'src/share/share.dto';
 import { TransactionReq } from '../washing_machine.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('api/v1/washing-machine')
 @Controller('api/v1/washing-machine')
 export class WashingMachineController {
   constructor(
     private washingMachine: WashingMachineService,
     private shared: ShareService,
   ) {}
-
-  @Post()
-  async createWashingMachine(): Promise<ResponseAPI> {
-    let result: any;
-    try {
-    } catch (e) {
-      result = this.shared.buildResponseAPI(null, e, false, 500);
-    }
-
-    return result;
-  }
 
   @Post(':machine_id/insert-coin')
   async insertCoin(

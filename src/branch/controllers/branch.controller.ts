@@ -2,7 +2,9 @@ import { Controller, Post, Patch, Delete, Get, Param } from '@nestjs/common';
 import { ResponseAPI } from 'src/share/share.dto';
 import { ShareService } from 'src/share/share.service';
 import { BranchService } from '../services/branch.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('api/v1/branh')
 @Controller('api/v1/branch')
 export class BranchController {
   constructor(
