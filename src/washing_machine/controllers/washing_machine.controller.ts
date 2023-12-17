@@ -30,7 +30,8 @@ export class WashingMachineController {
     let result: any;
 
     try {
-      result = this.washingMachine.onInsertCoin(machine_id, req.coin);
+      // result = this.washingMachine.onInsertCoin(machine_id, req.coin);
+      result = this.washingMachine.onTest();
     } catch (e) {
       result = this.shared.buildResponseAPI(null, e, false, 500);
     }

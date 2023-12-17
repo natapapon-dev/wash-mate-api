@@ -9,13 +9,9 @@ export class WashingMachineTodoService {
 
   async toGetWashingMachineByUUID(uuid: string): Promise<WashingMachine> {
     const result = await this.prisma.washingMachine.findFirst({
-      where: { uuid: uuid },
+      where: { uuid: uuid, status: 0 },
       include: {
-        WashingMachineLocation: {
-          where: {
-            status: 0,
-          },
-        },
+        WashingMachineLocation: true,
       },
     });
     return result;

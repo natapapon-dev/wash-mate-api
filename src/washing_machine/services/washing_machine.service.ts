@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 import { WashingMachineTodoService } from './washing_machine.todo.service';
 import { ShareService } from 'src/share/share.service';
 import { ResponseAPI } from 'src/share/share.dto';
 import { TransactionPayload } from '../washing_machine.dto';
+import { InjectQueue } from '@nestjs/bull';
+import { NotifyService } from 'src/notify/service/notify.service';
 import { WashingMachineLocationTodoService } from 'src/washing_machine_location/services/washing_machine_location.todo.service';
 
 @Injectable()
@@ -11,7 +14,16 @@ export class WashingMachineService {
     private washingMachineTodo: WashingMachineTodoService,
     private washingMachineLocationTodo: WashingMachineLocationTodoService,
     private shared: ShareService,
+    private schdule: SchedulerRegistry,
+    private notify: NotifyService,
   ) {}
+
+  async onTest(): Promise<ResponseAPI> {
+    let result: any;
+    result = await this.notify.postMessage();
+    console.log(result);
+    return result;
+  }
 
   async onInsertCoin(machine_id: string, coin: number): Promise<ResponseAPI> {
     let result: any;
@@ -24,7 +36,19 @@ export class WashingMachineService {
 
     let washingMachine =
       await this.washingMachineTodo.toGetWashingMachineByUUID(machine_id);
+
     if (washingMachine) {
+      if (washingMachine['WashingMachineLocation'].length < 1) {
+        result = this.shared.buildResponseAPI(
+          null,
+          `This machine is currently in used`,
+          false,
+          403,
+        );
+
+        return result;
+      }
+
       result = await this.washingMachineTodo.toGetLastestTransaction(
         washingMachine.id,
       );
@@ -56,7 +80,7 @@ export class WashingMachineService {
 
       if (result.is_complete) {
         const update_wm_status =
-          this.washingMachineLocationTodo.toUpdateMachineLocationStatus(
+          await this.washingMachineLocationTodo.toUpdateMachineLocationStatus(
             2,
             result.washing_machine_location_id,
           );
@@ -70,6 +94,17 @@ export class WashingMachineService {
           );
 
           return result;
+        } else {
+          await this.washingMachineTodo.toUpdateWashingMachineStatus(
+            washingMachine.id,
+            2,
+          );
+          this.delayedExecution(
+            2 * 60 * 1000,
+            result.washing_machine_location_id,
+          );
+
+          // this.setNotiLineCountDown(result.washing_machine_location_id);
         }
       }
     } else {
@@ -109,7 +144,30 @@ export class WashingMachineService {
     return result;
   }
 
-  async setNotiTime(): Promise<any> {
-    return;
+  delayedExecution(delay: number, machineLocationId: number): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        this.setNotiLineCountDown(machineLocationId);
+        resolve();
+      }, delay);
+    });
+  }
+
+  // @Cron('50 * * * * *')
+  async setNotiLineCountDown(machineLocationId: number) {
+    const result =
+      await this.washingMachineLocationTodo.toUpdateMachineLocationStatus(
+        0,
+        machineLocationId,
+      );
+
+    const result_w = await this.washingMachineTodo.toUpdateWashingMachineStatus(
+      result.washing_machine_id,
+      0,
+    );
+
+    console.log('Called when is 1 minute');
+    console.debug(result);
+    console.debug(result_w);
   }
 }

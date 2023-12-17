@@ -26,7 +26,7 @@ model WashingMachine {
   id                     Int                      @id @default(autoincrement())
   uuid                   String                   @default(uuid()) @db.Uuid
   number                 String
-  status                 Int // 0 = normal, 1 = broken
+  status                 Int // 0 = normal, 1 = broken, 2 = in_used
   WashingMachineLocation WashingMachineLocation[]
 }
 
