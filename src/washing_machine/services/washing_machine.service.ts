@@ -18,13 +18,6 @@ export class WashingMachineService {
     private notify: NotifyService,
   ) {}
 
-  async onTest(): Promise<ResponseAPI> {
-    let result: any;
-    result = await this.notify.postMessage();
-    console.log(result);
-    return result;
-  }
-
   async onInsertCoin(machine_id: string, coin: number): Promise<ResponseAPI> {
     let result: any;
 
