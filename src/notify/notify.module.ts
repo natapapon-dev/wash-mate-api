@@ -16,10 +16,6 @@ import * as https from 'https';
             'Content-Type': 'application/x-www-form-urlencoded',
           },
         } as any,
-        httpsAgent: new https.Agent({
-          rejectUnauthorized: false, // Set to true to enable SSL verification
-          // Other SSL options can be set here
-        }),
       }),
     }),
   ],

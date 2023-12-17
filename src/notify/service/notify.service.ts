@@ -6,18 +6,24 @@ import { HttpService } from '@nestjs/axios';
 export class NotifyService {
   constructor(private readonly httpService: HttpService) {}
 
-  async postMessage(message: string): Promise<any> {
+  async notifyJob(branchToken: string, message: string): Promise<any> {
+    branchToken = 'Fd4cZR76hLZF61zvAdhB754UpoL9E5h2EiJyA2IN2ht';
     try {
+      const configBranchToken = {
+        headers: {
+          Authorization: `Bearer ${branchToken}`,
+        },
+      };
+
       const response = await this.httpService
-        .post('/api/notify', `message=${message}`)
+        .post('/api/notify', `message=${message}`, configBranchToken)
         .toPromise();
 
-      console.log('LINE Notify response status:', response.status);
-      console.log('LINE Notify response data:', response.data);
+      console.debug('LINE Notify response status:', response.status);
+      console.debug('LINE Notify response data:', response.data);
 
       return response.data;
     } catch (error) {
-      console.error('Error sending LINE Notify:', error.message);
       throw error;
     }
   }
