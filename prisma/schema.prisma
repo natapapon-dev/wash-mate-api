@@ -42,11 +42,12 @@ model WashingMachineLocation {
 }
 
 model Branch {
-  id                     Int                      @id @default(autoincrement())
-  uuid                   String                   @default(uuid()) @db.Uuid
-  branch_name            String
-  branch_address         String
-  WashingMachineLocation WashingMachineLocation[]
+  id                      Int                      @id @default(autoincrement())
+  uuid                    String                   @default(uuid()) @db.Uuid
+  branch_name             String
+  branch_address          String
+  branch_line_group_token String?
+  WashingMachineLocation  WashingMachineLocation[]
 }
 
 // model WashingPriceRate {
